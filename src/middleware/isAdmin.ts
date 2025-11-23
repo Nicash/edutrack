@@ -14,7 +14,14 @@ const ADMIN_EMAILS = [
 const checkIsAdmin = async (req: RequestExt, res: Response, next: NextFunction) => {
     try {
         // Obtener el email del usuario autenticado (viene del middleware checkJwt)
-        const userEmail = req.user?.id; // El id es el email según el token JWT
+        const userPayload = req.user;
+
+        // Validar que el payload no sea un string
+        if (!userPayload || typeof userPayload === "string") {
+            return res.status(401).json({ error: "Usuario no autenticado" });
+        }
+
+        const userEmail = userPayload.id; // El id es el email según el token JWT
 
         if (!userEmail) {
             return res.status(401).json({ error: "Usuario no autenticado" });
