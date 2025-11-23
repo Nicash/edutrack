@@ -16,7 +16,6 @@ const checkJwt = (req: RequestExt, res: Response, next: NextFunction) => {
 
         // Verifica si el token es válido
         const isUser = verifyToken(`${jwt}`);
-        console.log(isUser);
 
         // Si el usuario no es válido devuelve 401 (no autorizado)
         if (!isUser) {
@@ -28,7 +27,6 @@ const checkJwt = (req: RequestExt, res: Response, next: NextFunction) => {
 
     } catch (e) {
         // Manejo de errores
-        console.log(e);
         res.status(400).json({ error: "Sesión no válida" });
     }
 };

@@ -19,7 +19,6 @@ readdirSync(PATH_ROUTER).forEach((fileName) => {
     if (clearName !== "index") {
         // Se importa dinámicamente el archivo como módulo
         import(`./${clearName}`).then((moduleRouter) => {
-            console.log(`Loading route: ${clearName}`); // Mostramos la ruta con el nombre sin extensión
             router.use(`/${clearName}`, moduleRouter.router); // Se monta la ruta en express
         });
     }

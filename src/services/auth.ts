@@ -5,6 +5,11 @@ import UserModel from "../models/user";
 import { encrypt, verified } from "../utils/bcrypt.handle";
 import { generateToken } from "../utils/jwt.handle";
 
+// Lista de emails de administradores hardcodeados
+const ADMIN_EMAILS = [
+    "admin@edutrack.com.ar"
+];
+
 // Servicio para registrar nuevo usuario
 const registerNewUser = async ({email, password, name}: User) => {
     const checkIs = await UserModel.findOne({email}); // Verifica si ya existe el usuario (email único)
@@ -26,12 +31,27 @@ const loginUser = async ({email, password}: Auth) => {
 
     if(!isCorrect) return "PASSWORD_INCORRECT"; // Notifica si la contraseña es incorrecta
 
+    // Determinar el rol basado en la lista hardcodeada de admins
+    const role = ADMIN_EMAILS.includes(email.toLowerCase()) ? "admin" : "user";
+    
+    // Actualizar el rol en la base de datos si es diferente
+    if (checkIs.role !== role) {
+        checkIs.role = role;
+        await checkIs.save();
+    }
+
     // Si es correcta se genera un token JWT para autentificar al usuario sin necesidad de volver a iniciar sesión en el futuro
     const token = generateToken(checkIs.email);
 
     const data = {
         token,
-        user: checkIs
+        user: {
+            _id: checkIs._id,
+            name: checkIs.name,
+            email: checkIs.email,
+            description: checkIs.description,
+            role: role
+        }
     };
 
     return data;

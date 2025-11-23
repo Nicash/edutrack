@@ -6,6 +6,8 @@ import { Request, Response } from "express";
 // Módulos locales
 import { createSubject, obtainAllSubjects, obtainSubject, removeSubject, modifySubject } from "../services/subject";
 import { handleHttp } from "../utils/error.handle";
+import { RequestExt } from "../interfaces/requestExt.interface";
+import UserModel from "../models/user";
 
 // Controlador para agregar materias
 export const addSubject = async (req: Request, res: Response) => {
@@ -53,8 +55,25 @@ export const getSubject = async (req: Request, res: Response) => {
 };
 
 // Controlador para obtener todas las materias
-export const getAllSubjects = async (req: Request, res: Response) => {
+export const getAllSubjects = async (req: RequestExt, res: Response) => {
   try {
+    const { subscribed } = req.query; // Nuevo parámetro opcional para filtrar
+    const userPayload = req.user; // Payload del JWT
+
+    // Si el usuario quiere solo sus materias suscritas
+    if (subscribed === "true" && userPayload && typeof userPayload !== "string") {
+      const userId = userPayload.id; // El email
+      const user = await UserModel.findOne({ email: userId }).populate("subscriptions");
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      return res.status(200).json({
+        message: "Subscribed subjects retrieved successfully",
+        data: user.subscriptions || [],
+      });
+    }
+
+    // Si no, devolver todas las materias
     const subjects = await obtainAllSubjects();
     res.status(200).json(subjects);
   } catch (error) {

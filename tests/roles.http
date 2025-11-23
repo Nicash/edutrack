@@ -1,0 +1,154 @@
+# ===================================
+# TEST DE SISTEMA DE ROLES - EduTrack
+# ===================================
+
+@baseUrl = http://localhost:3001
+@contentType = application/json
+
+# Variables para tokens (se actualizan después de cada login)
+@adminToken = 
+@userToken = 
+
+# ===================================
+# 1. LOGIN COMO ADMINISTRADOR
+# ===================================
+
+### Login con cuenta de administrador
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@edutrack.com.ar",
+  "password": "admin_edutrack"
+}
+
+# ⬆️ COPIAR EL TOKEN DE LA RESPUESTA Y PEGARLO EN @adminToken
+
+# ===================================
+# 2. CREAR USUARIO NORMAL
+# ===================================
+
+### Registrar usuario normal
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "name": "Usuario Normal",
+  "email": "usuario@test.com",
+  "password": "test123"
+}
+
+### Login con usuario normal
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "usuario@test.com",
+  "password": "test123"
+}
+
+# ⬆️ COPIAR EL TOKEN DE LA RESPUESTA Y PEGARLO EN @userToken
+
+# ===================================
+# 3. PRUEBAS CON ADMINISTRADOR ✅
+# ===================================
+
+### [ADMIN] Ver todas las materias (debería funcionar)
+GET {{baseUrl}}/subject/getAll
+Authorization: Bearer {{adminToken}}
+
+### [ADMIN] Crear materia (debería funcionar)
+POST {{baseUrl}}/subject/add
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Matemática Avanzada",
+  "objective": "Desarrollar habilidades matemáticas avanzadas",
+  "content": "Cálculo, Álgebra Lineal, Ecuaciones Diferenciales"
+}
+
+### [ADMIN] Actualizar materia (debería funcionar)
+# Nota: Reemplazar :id con un ID real de materia
+PUT {{baseUrl}}/subject/update/REEMPLAZAR_CON_ID_REAL
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Matemática Avanzada Actualizada",
+  "objective": "Objetivo actualizado",
+  "content": "Contenido actualizado"
+}
+
+### [ADMIN] Eliminar materia (debería funcionar)
+DELETE {{baseUrl}}/subject/delete
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Matemática Avanzada"
+}
+
+# ===================================
+# 4. PRUEBAS CON USUARIO NORMAL ❌
+# ===================================
+
+### [USER] Ver todas las materias (debería funcionar ✅)
+GET {{baseUrl}}/subject/getAll
+Authorization: Bearer {{userToken}}
+
+### [USER] Intentar crear materia (debería fallar con 403 ❌)
+POST {{baseUrl}}/subject/add
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "name": "Materia Prohibida",
+  "objective": "No debería poder crearla",
+  "content": "Este request debe fallar"
+}
+
+### [USER] Intentar actualizar materia (debería fallar con 403 ❌)
+PUT {{baseUrl}}/subject/update/REEMPLAZAR_CON_ID_REAL
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "name": "Intento de actualización",
+  "objective": "No debería funcionar",
+  "content": "Prohibido"
+}
+
+### [USER] Intentar eliminar materia (debería fallar con 403 ❌)
+DELETE {{baseUrl}}/subject/delete
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "name": "Matemática Avanzada"
+}
+
+# ===================================
+# 5. PRUEBAS SIN AUTENTICACIÓN ❌
+# ===================================
+
+### Sin token - Ver materias (debería fallar con 401 ❌)
+GET {{baseUrl}}/subject/getAll
+
+### Sin token - Crear materia (debería fallar con 401 ❌)
+POST {{baseUrl}}/subject/add
+Content-Type: {{contentType}}
+
+{
+  "name": "Sin Permiso",
+  "objective": "No autorizado",
+  "content": "Debe fallar"
+}
+
+# ===================================
+# RESULTADOS ESPERADOS:
+# ===================================
+# ✅ Admin puede: Ver, Crear, Editar, Eliminar materias
+# ✅ Usuario normal puede: Ver materias
+# ❌ Usuario normal NO puede: Crear, Editar, Eliminar (403 Forbidden)
+# ❌ Sin autenticación: Ninguna acción permitida (401 Unauthorized)

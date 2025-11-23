@@ -1,0 +1,118 @@
+# ===================================
+# TEST DE SUSCRIPCIONES - EduTrack
+# ===================================
+
+@baseUrl = http://localhost:3001
+@contentType = application/json
+
+# Variables para tokens
+@userToken = 
+
+# ===================================
+# 1. LOGIN COMO USUARIO
+# ===================================
+
+### Login con usuario normal
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "usuario@test.com",
+  "password": "test123"
+}
+
+# ⬆️ COPIAR EL TOKEN Y PEGARLO EN @userToken
+
+# ===================================
+# 2. VER TODAS LAS MATERIAS CON ESTADO DE SUSCRIPCIÓN
+# ===================================
+
+### Ver todas las materias con indicador de suscripción
+GET {{baseUrl}}/subscription/all-with-status
+Authorization: Bearer {{userToken}}
+
+# ===================================
+# 3. SUSCRIBIRSE A UNA MATERIA
+# ===================================
+
+### Suscribirse a una materia (reemplazar SUBJECT_ID con un ID real)
+POST {{baseUrl}}/subscription/subscribe
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "subjectId": "REEMPLAZAR_CON_ID_REAL"
+}
+
+# ===================================
+# 4. VER MIS MATERIAS SUSCRITAS
+# ===================================
+
+### Ver solo las materias a las que estoy suscrito
+GET {{baseUrl}}/subscription/my-subscriptions
+Authorization: Bearer {{userToken}}
+
+### Alternativa: Ver materias suscritas usando el endpoint de subject
+GET {{baseUrl}}/subject/getAll?subscribed=true
+Authorization: Bearer {{userToken}}
+
+# ===================================
+# 5. DESUSCRIBIRSE DE UNA MATERIA
+# ===================================
+
+### Desuscribirse de una materia (reemplazar SUBJECT_ID con un ID real)
+POST {{baseUrl}}/subscription/unsubscribe
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "subjectId": "REEMPLAZAR_CON_ID_REAL"
+}
+
+# ===================================
+# 6. PRUEBAS DE ERROR
+# ===================================
+
+### Intentar suscribirse sin autenticación (debe fallar con 401)
+POST {{baseUrl}}/subscription/subscribe
+Content-Type: {{contentType}}
+
+{
+  "subjectId": "123456789012345678901234"
+}
+
+### Intentar suscribirse dos veces a la misma materia (debe fallar con 409)
+POST {{baseUrl}}/subscription/subscribe
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "subjectId": "REEMPLAZAR_CON_ID_YA_SUSCRITO"
+}
+
+### Intentar desuscribirse de una materia no suscrita (debe fallar con 409)
+POST {{baseUrl}}/subscription/unsubscribe
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "subjectId": "REEMPLAZAR_CON_ID_NO_SUSCRITO"
+}
+
+### Intentar suscribirse a una materia inexistente (debe fallar con 404)
+POST {{baseUrl}}/subscription/subscribe
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "subjectId": "123456789012345678901234"
+}
+
+# ===================================
+# ENDPOINTS DISPONIBLES:
+# ===================================
+# POST   /subscription/subscribe           - Suscribirse a una materia
+# POST   /subscription/unsubscribe         - Desuscribirse de una materia
+# GET    /subscription/my-subscriptions    - Ver materias suscritas
+# GET    /subscription/all-with-status     - Ver todas con estado de suscripción
+# GET    /subject/getAll?subscribed=true   - Ver solo materias suscritas
