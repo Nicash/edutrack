@@ -6,12 +6,16 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
     "developer": "tsc-watch --onSuccess \"node dist/app.js\"",
+    "watch": "tsc-watch --onSuccess \"node dist/app.js\"",
     "build": "tsc",
     "start": "node dist/app.js"
   },
   "keywords": ["edutrack", "api", "typescript", "nodejs", "express", "mongodb", "education", "utn"],
   "author": "Marcos Gómez y Nicolás Chaves - UTN FRVT",
   "license": "GPL-3.0",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
@@ -24,7 +28,6 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.19",
-    "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20.0.0",
